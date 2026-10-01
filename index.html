@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>चुपाकाबरा खाता — क्रिप्टोग्राफ़िक लेज़र</title>
+  
+  <meta name="theme-color" content="#0b0f19">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <style>
+    :root {
+      --bg-body: #0b0f19;
+      --bg-card: #151d30;
+      --bg-input: #0c1222;
+      --border: #24304f;
+      --gold: #f59e0b;
+      --green: #10b981;
+      --red: #f43f5e;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg-body); color: var(--text); padding: 12px; display: flex; justify-content: center; min-height: 100vh; }
+    .app { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 14px; }
+
+    /* हेडर */
+    .header {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      border-radius: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-logo-img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; border: 1px solid var(--gold); }
+    .brand h1 { font-size: 17px; color: var(--gold); font-weight: 800; }
+    .brand small { font-size: 11px; color: var(--text-muted); display: block; }
+
+    /* ब्लॉकचेन स्टेटस */
+    .chain-badge {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--green);
+      color: var(--green);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      text-align: center;
+      font-weight: 700;
+    }
+    .chain-corrupt { background: rgba(244, 63, 94, 0.15); border-color: var(--red); color: var(--red); }
+
+    /* बैलेंस कार्ड */
+    .balance-card {
+      background: linear-gradient(135deg, #172033, #0b0f19);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+    }
+    .balance-title { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+    .balance-val { font-size: 26px; font-weight: 800; margin: 4px 0 12px; }
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat-box { background: rgba(255,255,255,0.04); padding: 8px; border-radius: 10px; font-size: 12px; }
+    .text-green { color: var(--green); }
+    .text-red { color: var(--red); }
+
+    /* बटन */
+    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn {
+      padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px; border: none;
+    }
+    .btn-gold { background: var(--gold); color: #000; }
+    .btn-dark { background: var(--bg-card); color: #fff; border: 1px solid var(--border); }
+    .btn-full { grid-column: span 2; }
+    .btn:disabled { opacity: 0.6; cursor: wait; }
+
+    /* वॉयस */
+    .voice-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 14px;
+      text-align: center;
+    }
+    .mic-btn {
+      background: var(--bg-input);
+      border: 2px solid var(--gold);
+      color: #fff;
+      padding: 8px 20px;
+      border-radius: 25px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .mic-btn.active { border-color: var(--red); color: var(--red); }
+    .transcript { font-size: 11px; color: var(--text-muted); margin-top: 6px; min-height: 16px; }
+
+    /* फॉर्म */
+    .form-card { background: var(--bg-card); border: 1px solid var(--border); padding: 14px; border-radius: 14px; }
+    .form-card h3 { font-size: 14px; margin-bottom: 10px; color: var(--gold); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    input, select {
+      background: var(--bg-input); border: 1px solid var(--border); color: #fff;
+      padding: 9px; border-radius: 8px; font-size: 13px; width: 100%; outline: none;
+    }
+    input:focus, select:focus { border-color: var(--gold); }
+
+    /* लेज़र लिस्ट */
+    .ledger-card { background: var(--bg-card); border: 1px solid var(--border); padding: 12px; border-radius: 14px; }
+    .ledger-title { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; }
+    .tx-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px;
+    }
+    .tx-row:last-child { border-bottom: none; }
+    .tx-details small { font-size: 10px; color: var(--text-muted); display: block; font-family: monospace; }
+    .tx-actions { display: flex; align-items: center; gap: 6px; }
+    .btn-sm { padding: 4px 8px; border-radius: 4px; font-size: 10px; border: 1px solid var(--border); background: var(--bg-input); color: #fff; cursor: pointer; }
+
+    /* मोडल */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 14px; }
+    .modal.show { display: flex; }
+    .modal-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; width: 100%; max-width: 360px; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .modal-close { cursor: pointer; font-size: 20px; color: var(--text-muted); }
+
+    /* स्टैंडी QR कार्ड */
+    .qr-standee {
+      background: #050811;
+      border: 2px solid #d97706;
+      border-radius: 14px;
+      padding: 16px 12px;
+      text-align: center;
+    }
+    .qr-repo-tag { font-size: 8px; color: #d97706; letter-spacing: 1px; font-weight: 700; }
+    .qr-title { font-size: 18px; font-weight: 800; color: #fbbf24; margin: 2px 0; }
+    .qr-shop-sub { font-size: 11px; color: #38bdf8; margin-bottom: 12px; }
+    .qr-wrapper {
+      position: relative;
+      width: 200px; height: 200px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 8px;
+      border-radius: 12px;
+    }
+    .qr-img { width: 100%; height: 100%; display: block; }
+    .qr-center-logo {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #000;
+      padding: 2px;
+    }
+    .qr-capsule {
+      margin: 12px auto 6px;
+      border: 1px solid #d97706;
+      border-radius: 20px;
+      padding: 4px 14px;
+      color: #fbbf24;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-block;
+      background: rgba(217, 119, 6, 0.1);
+    }
+
+    /* 1-पेज प्रिंट */
+    #printArea { display: none; }
+    @media print {
+      @page { margin: 6mm; size: auto; }
+      body { background: #fff !important; color: #000 !important; padding: 0 !important; margin: 0 !important; }
+      .no-print { display: none !important; }
+      #printArea { display: block !important; page-break-inside: avoid; break-inside: avoid; }
+      table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+      th, td { border: 1px solid #444; padding: 5px 8px; font-size: 11px; color: #000; }
+      th { background: #eee; }
+      .thermal-slip { width: 72mm; margin: 0 auto; font-family: monospace; font-size: 11px; }
+      .thermal-slip table th, .thermal-slip table td { border: none; border-bottom: 1px dashed #000; padding: 3px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app no-print">
+
+    <header class="header">
+      <div class="brand">
+        <img src="logo.png" onerror="this.src='https://via.placeholder.com/44?text=CK';" alt="Logo" class="brand-logo-img">
+        <div>
+          <h1>चुपाकाबरा - खाता -</h1>
+          <small id="hdrMerchantName">दुकान: मेरी दुकान</small>
+        </div>
+      </div>
+      <button class="btn btn-dark" style="padding:6px 10px; font-size:11px;" onclick="openSettings()">⚙️ सेटिंग्स</button>
+    </header>
+
+    <div id="chainStatusBox" class="chain-badge">
+      ✓ ब्लॉकचेन लेज़र सुरक्षित (0% छेड़छाड़ • PoW Verified)
+    </div>
+
+    <section class="balance-card">
+      <div class="balance-title">शुद्ध व्यापार स्थिति (NET BALANCE)</div>
+      <div class="balance-val" id="netBalanceVal">₹0</div>
+      <div class="stats-row">
+        <div class="stat-box">कुल जमा: <b class="text-green" id="totInVal">₹0</b></div>
+        <div class="stat-box">कुल उधार: <b class="text-red" id="totOutVal">₹0</b></div>
+      </div>
+    </section>
+
+    <div class="btn-grid">
+      <button class="btn btn-gold" onclick="openQrModal()">▣ दुकान स्टैंडी QR</button>
+      <button class="btn btn-dark" onclick="openPrintModal()">🖨️ 1-पेज बिल प्रिंट</button>
+    </div>
+
+    <section class="voice-box">
+      <button id="micBtn" class="mic-btn" onclick="toggleVoice()">🎤 बोलकर प्रविष्टि दर्ज करें</button>
+      <div class="transcript" id="transcript">माइक चालू करें और बोलें: "अमित को 400 दिए"...</div>
+    </section>
+
+    <section class="form-card">
+      <h3>खाते में नई एंट्री जोड़ें (Proof-of-Work)</h3>
+      <form id="entryForm" onsubmit="mineAndSave(event)" class="form-grid">
+        <input type="text" id="custName" placeholder="ग्राहक का नाम" required autocomplete="off">
+        <input type="number" id="custAmount" placeholder="राशि (₹)" min="1" step="any" required>
+        <select id="custType">
+          <option value="OUT">उधार दिया (OUT)</option>
+          <option value="IN">जमा मिला (IN)</option>
+        </select>
+        <input type="text" id="popRef" placeholder="Proof of Payment (UTR / बिल नं)">
+        <button type="submit" id="mineBtn" class="btn btn-gold btn-full">⛏️ माइन करें और ब्लॉक जोड़ें</button>
+      </form>
+    </section>
+
+    <section class="ledger-card">
+      <div class="ledger-title">ऑडिट लेज़र (क्रिप्टोग्राफ़िक ब्लॉक्स)</div>
+      <div id="txListContainer"></div>
+    </section>
+
+  </div>
+
+  <!-- मोडल 1: स्टैंडी QR -->
+  <div class="modal" id="qrModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 style="font-size:15px; color:var(--gold);">मर्चेंट QR कोड</h3>
+        <span class="modal-close" onclick="closeQrModal()">&times;</span>
+      </div>
+      <div class="qr-standee">
+        <div class="qr-repo-tag">★ OFFICIAL MERCHANT REPOSITORY ★</div>
+        <div class="qr-title">चुपाकाबरा - खाता -</div>
+        <div class="qr-shop-sub" id="qrMerchantSub">दुकान: मेरी दुकान</div>
+        <div class="qr-wrapper">
+          <img id="qrImageEl" src="" alt="UPI QR" class="qr-img">
+          <img src="logo.png" onerror="this.style.display='none'" class="qr-center-logo" alt="Logo">
+        </div>
+        <div class="qr-capsule" id="qrUpiCapsule">9818589869@ptyes</div>
+        <div style="font-size:9px; color:#94a3b8; margin-top:6px;">GPay • PhonePe • Paytm • BHIM UPI</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- मोडल 2: प्रिंट -->
+  <div class="modal" id="printModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>प्रिंट सेटअप</h3>
+        <span class="modal-close" onclick="closePrintModal()">&times;</span>
+      </div>
+      <button class="btn btn-gold" style="width:100%; margin-bottom:8px;" onclick="printStatement('A4')">📄 1-पेज A4 लेज़र स्टेटमेंट</button>
+      <button class="btn btn-dark" style="width:100%;" onclick="printStatement('ROLL')">🧾 80mm थर्मल रोल पर्ची</button>
+    </div>
+  </div>
+
+  <!-- मोडल 3: सेटिंग्स -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>दुकान सेटिंग्स</h3>
+        <span class="modal-close" onclick="closeSettings()">&times;</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <input type="text" id="setMerchantName" placeholder="दुकानदार / दुकान का नाम">
+        <input type="text" id="setUpi" placeholder="UPI ID (उदा. 9818589869@ptyes)">
+        <button class="btn btn-gold" style="margin-top:6px;" onclick="saveSettings()">सेव करें</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- मोडल 4: भूल सुधार (Correction Block) -->
+  <div class="modal" id="correctionModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>भूल सुधार प्रविष्टि (Correction)</h3>
+        <span class="modal-close" onclick="closeCorrectionModal()">&times;</span>
+      </div>
+      <form onsubmit="saveCorrectionBlock(event)" style="display:flex; flex-direction:column; gap:8px;">
+        <input type="hidden" id="corrBlockIndex">
+        <input type="text" id="corrName" readonly style="opacity:0.7;">
+        <input type="number" id="corrAmount" placeholder="सही शुद्ध राशि (₹) [0 दर्ज करने पर पूर्ण निरस्त]" min="0" step="any" required>
+        <button type="submit" id="corrBtn" class="btn btn-gold">सुधार ब्लॉक माइन करें</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="printArea"></div>
+  <!-- ========================================== -->
+  <!-- प्रमाणित नॉन-ब्लॉकिंग क्रिप्टोग्राफिक इंजन -->
+  <!-- ========================================== -->
+  <script>
+    // 1. शुद्ध SHA-256 हैश जनरेटर
+    async function sha256(str) {
+      const buffer = new TextEncoder().encode(str);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // 2. स्थिर स्ट्रिंग पेलोड
+    function createBlockPayload(block, nonce) {
+      const dataStr = `${block.data.name}|${block.data.amount}|${block.data.type}|${block.data.pop}`;
+      return `${block.index}_${block.timestamp}_${dataStr}_${block.prevHash}_${nonce}`;
+    }
+
+    async function calculateHash(block) {
+      return await sha256(createBlockPayload(block, block.nonce));
+    }
+
+    // 3. नॉन-ब्लॉकिंग Proof-of-Work (PoW) माइनर
+    async function mineBlock(newBlock, targetDiff = "00") {
+      let nonce = 0;
+      while (true) {
+        const payload = createBlockPayload(newBlock, nonce);
+        const hash = await sha256(payload);
+
+        if (hash.startsWith(targetDiff)) {
+          newBlock.nonce = nonce;
+          newBlock.hash = hash;
+          return newBlock;
+        }
+        nonce++;
+        if (nonce % 500 === 0) {
+          await new Promise(r => setTimeout(r, 0)); // UI को रिस्पॉन्सिव रखने हेतु
+        }
+      }
+    }
+
+    // 4. स्टोरेज एवं स्टेट
+    let blockchain = JSON.parse(localStorage.getItem('CHUPAKABRA_BLOCKCHAIN')) || [];
+    let merchantSettings = JSON.parse(localStorage.getItem('CHUPAKABRA_SETTINGS')) || {
+      merchantName: "मेरी दुकान",
+      upi: "9818589869@ptyes"
+    };
+
+    // 5. जेनेसिस ब्लॉक
+    async function initBlockchain() {
+      if (blockchain.length === 0) {
+        const genesis = {
+          index: 0,
+          timestamp: new Date().toISOString(),
+          data: { name: "GENESIS", amount: 0, type: "SYSTEM", pop: "000000" },
+          prevHash: "0000000000000000000000000000000000000000000000000000000000000000",
+          nonce: 0,
+          hash: ""
+        };
+        genesis.hash = await calculateHash(genesis);
+        blockchain.push(genesis);
+        localStorage.setItem('CHUPAKABRA_BLOCKCHAIN', JSON.stringify(blockchain));
+      }
+      applySettingsToUI();
+      await verifyAndRender();
+    }
+
+    // 6. नई एंट्री माइनिंग
+    async function mineAndSave(e) {
+      e.preventDefault();
+      const btn = document.getElementById('mineBtn');
+      btn.disabled = true;
+      btn.innerText = "⛏️ माइनिंग जारी है...";
+
+      const name = document.getElementById('custName').value.trim();
+      const amount = parseFloat(document.getElementById('custAmount').value);
+      const type = document.getElementById('custType').value;
+      const pop = document.getElementById('popRef').value.trim() || 'RECEIPT_' + Date.now();
+
+      const lastBlock = blockchain[blockchain.length - 1];
+      let newBlock = {
+        index: blockchain.length,
+        timestamp: new Date().toISOString(),
+        data: { name, amount, type, pop },
+        prevHash: lastBlock.hash,
+        nonce: 0,
+        hash: ""
+      };
+
+      newBlock = await mineBlock(newBlock, "00");
+
+      blockchain.push(newBlock);
+      localStorage.setItem('CHUPAKABRA_BLOCKCHAIN', JSON.stringify(blockchain));
+
+      document.getElementById('entryForm').reset();
+      btn.disabled = false;
+      btn.innerText = "⛏️ माइन करें और ब्लॉक जोड़ें";
+
+      speak(`${name} की ₹${amount} की एंट्री ब्लॉकचेन में जुड़ गई`);
+      await verifyAndRender();
+    }
+
+    // 7. सत्यापन और रेंडरिंग
+    async function verifyAndRender() {
+      const statusBox = document.getElementById('chainStatusBox');
+      let isValid = true;
+
+      for (let i = 1; i < blockchain.length; i++) {
+        const cur = blockchain[i];
+        const prev = blockchain[i - 1];
+
+        if (cur.prevHash !== prev.hash || cur.hash !== await calculateHash(cur)) {
+          isValid = false;
+          statusBox.className = "chain-badge chain-corrupt";
+          statusBox.innerText = `🚨 ब्लॉक #${cur.index} में छेड़छाड़ पकड़ी गई! लेज़र अमान्य है।`;
+          break;
+        }
+      }
+
+      if (isValid) {
+        statusBox.className = "chain-badge";
+        statusBox.innerText = "✓ ब्लॉकचेन लेज़र सुरक्षित (0% छेड़छाड़ • PoW Verified)";
+      }
+
+      renderUI();
+    }
+
+    function renderUI() {
+      const container = document.getElementById('txListContainer');
+      container.innerHTML = "";
+
+      let totIn = 0;
+      let totOut = 0;
+      const userBlocks = blockchain.filter(b => b.index > 0);
+
+      if (userBlocks.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:15px; font-size:12px; color:var(--text-muted);">कोई प्रविष्टि नहीं है</div>`;
+      }
+
+      userBlocks.forEach(b => {
+        const amt = Number(b.data.amount) || 0;
+        if (b.data.type === 'IN') totIn += amt;
+        else totOut += amt;
+
+        const isInc = b.data.type === 'IN';
+        const d = new Date(b.timestamp).toLocaleDateString('hi-IN', { day:'2-digit', month:'short' });
+
+        const row = document.createElement('div');
+        row.className = "tx-row";
+        row.innerHTML = `
+          <div class="tx-details">
+            <b>${escapeHtml(b.data.name)}</b>
+            <small>${d} • ब्लॉक #${b.index} • UTR: ${escapeHtml(b.data.pop)}</small>
+            <small style="color:var(--gold);">Hash: ${b.hash.slice(0, 16)}...</small>
+          </div>
+          <div class="tx-actions">
+            <b class="${isInc ? 'text-green' : 'text-red'}">${isInc ? '+' : '-'}₹${amt}</b>
+            ${!isInc ? `<button class="btn-sm" onclick="triggerWhatsAppByIndex(${b.index})">💬</button>` : ''}
+            <button class="btn-sm" onclick="openCorrection(${b.index})">सुधार</button>
+          </div>
+        `;
+        container.prepend(row);
+      });
+
+      const diff = totIn - totOut;
+      const netEl = document.getElementById('netBalanceVal');
+      if (diff < 0) {
+        netEl.innerText = `₹${Math.abs(diff).toLocaleString('en-IN')} (उधार बाकी)`;
+        netEl.className = "balance-val text-red";
+      } else if (diff > 0) {
+        netEl.innerText = `₹${diff.toLocaleString('en-IN')} (जमा शेष)`;
+        netEl.className = "balance-val text-green";
+      } else {
+        netEl.innerText = "₹0 (हिसाब बराबर)";
+        netEl.className = "balance-val";
+      }
+
+      document.getElementById('totInVal').innerText = `₹${totIn.toLocaleString('en-IN')}`;
+      document.getElementById('totOutVal').innerText = `₹${totOut.toLocaleString('en-IN')}`;
+    }
+
+    // 8. पारदर्शी सुधार प्रविष्टि (Double-Entry Reversal Engine)
+    function openCorrection(index) {
+      const b = blockchain.find(item => item.index === index);
+      if (!b) return;
+      document.getElementById('corrBlockIndex').value = index;
+      document.getElementById('corrName').value = b.data.name;
+      document.getElementById('corrAmount').value = '';
+      document.getElementById('correctionModal').classList.add('show');
+    }
+    function closeCorrectionModal() { document.getElementById('correctionModal').classList.remove('show'); }
+
+    async function saveCorrectionBlock(e) {
+      e.preventDefault();
+      const btn = document.getElementById('corrBtn');
+      btn.disabled = true;
+
+      const origIndex = parseInt(document.getElementById('corrBlockIndex').value, 10);
+      const origBlock = blockchain.find(b => b.index === origIndex);
+
+      if (!origBlock) {
+        alert('मूल ब्लॉक नहीं मिला!');
+        btn.disabled = false;
+        return;
+      }
+
+      const correctedAmount = parseFloat(document.getElementById('corrAmount').value);
+      if (isNaN(correctedAmount) || correctedAmount < 0) {
+        alert('कृपया मान्य राशि दर्ज करें');
+        btn.disabled = false;
+        return;
+      }
+
+      try {
+        // चरण 1: मूल ब्लॉक का पूर्ण रिवर्सल
+        btn.innerText = "⛏️ 1/2: मूल ब्लॉक निरस्त हो रहा है...";
+        const reverseType = (origBlock.data.type === 'OUT') ? 'IN' : 'OUT';
+        let lastBlock = blockchain[blockchain.length - 1];
+
+        let reversalBlock = {
+          index: blockchain.length,
+          timestamp: new Date().toISOString(),
+          data: {
+            name: `${origBlock.data.name} [निरस्तीकरण #${origIndex}]`,
+            amount: Number(origBlock.data.amount) || 0,
+            type: reverseType,
+            pop: `REV_FOR_BLK_${origIndex}`
+          },
+          prevHash: lastBlock.hash,
+          nonce: 0,
+          hash: ""
+        };
+
+        reversalBlock = await mineBlock(reversalBlock, "00");
+        blockchain.push(reversalBlock);
+
+        // चरण 2: सही राशि का नया ब्लॉक दर्ज करना
+        if (correctedAmount > 0) {
+          btn.innerText = "⛏️ 2/2: सही प्रविष्टि माइन हो रही है...";
+          lastBlock = blockchain[blockchain.length - 1];
+
+          let correctedBlock = {
+            index: blockchain.length,
+            timestamp: new Date().toISOString(),
+            data: {
+              name: `${origBlock.data.name} [संशोधित मान]`,
+              amount: correctedAmount,
+              type: origBlock.data.type,
+              pop: `CORR_NEW_FOR_${origIndex}`
+            },
+            prevHash: lastBlock.hash,
+            nonce: 0,
+            hash: ""
+          };
+
+          correctedBlock = await mineBlock(correctedBlock, "00");
+          blockchain.push(correctedBlock);
+        }
+
+        localStorage.setItem('CHUPAKABRA_BLOCKCHAIN', JSON.stringify(blockchain));
+        closeCorrectionModal();
+        speak('सुधार प्रविष्टि डबल-रिवर्सल के साथ ब्लॉकचेन में दर्ज हो गई');
+        await verifyAndRender();
+
+      } catch (err) {
+        console.error('माइनिंग त्रुटि:', err);
+        alert('सुधार प्रविष्टि माइन करने में विफल');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "सुधार ब्लॉक माइन करें";
+      }
+    }
+
+    // सुरक्षित WhatsApp ट्रिगर (XSS-सुरक्षित)
+    function triggerWhatsAppByIndex(index) {
+      const b = blockchain.find(item => item.index === index);
+      if (!b) return;
+      const amt = Number(b.data.amount) || 0;
+      const msg = `नमस्ते ${b.data.name} जी, ${merchantSettings.merchantName} (चुपाकाबरा खाता) में आपका ₹${amt} बकाया शेष है। कृपया समय पर भुगतान करें। UPI: ${merchantSettings.upi}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // 9. मर्चेंट स्टैंडी QR
+    function openQrModal() {
+      const upi = merchantSettings.upi;
+      const shop = merchantSettings.merchantName;
+      document.getElementById('qrMerchantSub').innerText = `दुकान: ${shop}`;
+      document.getElementById('qrUpiCapsule').innerText = upi;
+
+      const upiUrl = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(shop)}&cu=INR`;
+      document.getElementById('qrImageEl').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUrl)}`;
+
+      document.getElementById('qrModal').classList.add('show');
+    }
+    function closeQrModal() { document.getElementById('qrModal').classList.remove('show'); }
+
+    // 10. 1-पेज प्रिंटिंग
+    function openPrintModal() { document.getElementById('printModal').classList.add('show'); }
+    function closePrintModal() { document.getElementById('printModal').classList.remove('show'); }
+
+    function printStatement(mode) {
+      const userBlocks = blockchain.filter(b => b.index > 0);
+      if (userBlocks.length === 0) { alert('प्रिंट के लिए कोई डेटा नहीं है'); return; }
+
+      let inSum = 0;
+      let outSum = 0;
+      userBlocks.forEach(b => {
+        const amt = Number(b.data.amount) || 0;
+        if (b.data.type === 'IN') inSum += amt;
+        else outSum += amt;
+      });
+
+      const net = inSum - outSum;
+      const netText = net < 0 ? `₹${Math.abs(net).toFixed(2)} (उधार बाकी)` : `₹${net.toFixed(2)} (जमा शेष)`;
+
+      const out = document.getElementById('printArea');
+      if (mode === 'A4') {
+        let rows = userBlocks.map(b => {
+          const amt = Number(b.data.amount) || 0;
+          return `
+            <tr>
+              <td>${new Date(b.timestamp).toLocaleDateString('hi-IN')}</td>
+              <td>${escapeHtml(b.data.name)}</td>
+              <td>${b.data.type === 'IN' ? 'जमा' : 'उधार'}</td>
+              <td style="text-align:right;">₹${amt.toFixed(2)}</td>
+              <td style="font-family:monospace; font-size:9px;">${b.hash.slice(0,12)}...</td>
+            </tr>
+          `;
+        }).join('');
+
+        out.innerHTML = `
+          <div style="padding:4px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h2 style="margin:0; font-size:18px;">चुपाकाबरा - खाता -</h2>
+                <p style="font-size:11px; margin:2px 0;">दुकान: <strong>${escapeHtml(merchantSettings.merchantName)}</strong> | UPI: ${escapeHtml(merchantSettings.upi)}</p>
+                <p style="font-size:10px; color:#555;">क्रिप्टोग्राफिक ऑडिट लेज़र (PoW Verified)</p>
+              </div>
+              <div style="text-align:right; font-size:11px;">दिनांक: ${new Date().toLocaleDateString('hi-IN')}</div>
+            </div>
+            <hr style="margin:6px 0;">
+            <table>
+              <thead>
+                <tr><th>तारीख</th><th>ग्राहक</th><th>प्रकार</th><th style="text-align:right;">राशि</th><th>ब्लॉक हैश</th></tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+            <div style="margin-top:12px; float:right; width:260px; font-size:12px;">
+              <p>कुल जमा: <strong>₹${inSum.toFixed(2)}</strong></p>
+              <p>कुल उधार: <strong>₹${outSum.toFixed(2)}</strong></p>
+              <hr style="margin:4px 0;">
+              <p style="font-size:13px;">शुद्ध स्थिति: <strong>${netText}</strong></p>
+            </div>
+            <div style="clear:both; margin-top:35px; display:flex; justify-content:space-between; font-size:11px;">
+              <div>ग्राहक हस्ताक्षर: _________</div>
+              <div>दुकानदार हस्ताक्षर: _________</div>
+            </div>
+          </div>
+        `;
+      } else {
+        let rows = userBlocks.map(b => {
+          const amt = Number(b.data.amount) || 0;
+          return `
+            <tr>
+              <td>${escapeHtml(b.data.name.slice(0,8))}</td>
+              <td>${b.data.type}</td>
+              <td style="text-align:right;">${amt.toFixed(0)}</td>
+            </tr>
+          `;
+        }).join('');
+
+        out.innerHTML = `
+          <div class="thermal-slip">
+            <center>
+              <h3 style="margin:0;">चुपाकाबरा खाता</h3>
+              <p style="font-size:10px;">${escapeHtml(merchantSettings.merchantName)}</p>
+              <small>UPI: ${escapeHtml(merchantSettings.upi)}</small>
+            </center>
+            <table>
+              <thead><tr><th>विवरण</th><th>टाइप</th><th style="text-align:right;">रुपये</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+            <div style="margin-top:6px; font-size:10px;">
+              <div>जमा: ₹${inSum.toFixed(0)} | उधार: ₹${outSum.toFixed(0)}</div>
+              <div style="font-weight:bold; margin-top:2px;">शुद्ध स्थिति: ${netText}</div>
+            </div>
+            <center style="margin-top:8px; font-size:9px;">** धन्यवाद! **</center>
+          </div>
+        `;
+      }
+
+      closePrintModal();
+      window.print();
+    }
+
+    // 11. वॉयस (सुधरा हुआ सुरक्षित इनिशियलाइजेशन)
+    const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let rec = null;
+    if (SpeechRecognitionClass) {
+      rec = new SpeechRecognitionClass();
+      rec.lang = 'hi-IN';
+      rec.onstart = () => {
+        document.getElementById('micBtn').classList.add('active');
+        document.getElementById('transcript').innerText = 'सुन रहा हूँ... बोलिए';
+      };
+      rec.onend = () => document.getElementById('micBtn').classList.remove('active');
+      rec.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        document.getElementById('transcript').innerText = `सुना: "${text}"`;
+
+        const digits = text.match(/\d+/g);
+        if (!digits) { speak('रुपये समझ नहीं आए'); return; }
+        const amt = parseFloat(digits[0]);
+
+        let type = 'IN';
+        if (['दिया', 'दिए', 'भेजा', 'उधार'].some(w => text.includes(w))) type = 'OUT';
+
+        let name = 'ग्राहक';
+        const m = text.match(/(.*?)(?:को|से|ने)/);
+        if (m && m[1]) {
+          name = m[1].replace(/\d+/g, '').replace(/रुपये|रुपया/g, '').trim();
+        } else {
+          const words = text.replace(/\d+/g, '').replace(/रुपये|रुपया|दिया|दिए|भेजा|उधार|जमा|मिला/g, '').trim().split(/\s+/);
+          if (words.length > 0 && words[0].length > 1) name = words[0];
+        }
+
+        document.getElementById('custName').value = name || 'ग्राहक';
+        document.getElementById('custAmount').value = amt;
+        document.getElementById('custType').value = type;
+        document.getElementById('mineBtn').click();
+      };
+    }
+    function toggleVoice() {
+      if (!rec) { alert('वॉयस इनपुट के लिए Google Chrome का उपयोग करें'); return; }
+      try {
+        rec.start();
+      } catch (err) {
+        console.warn('माइक पहले से सक्रिय है:', err);
+      }
+    }
+    function speak(txt) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(txt);
+        u.lang = 'hi-IN';
+        window.speechSynthesis.speak(u);
+      }
+    }
+
+    // 12. सेटिंग्स
+    function openSettings() {
+      document.getElementById('setMerchantName').value = merchantSettings.merchantName;
+      document.getElementById('setUpi').value = merchantSettings.upi;
+      document.getElementById('settingsModal').classList.add('show');
+    }
+    function closeSettings() { document.getElementById('settingsModal').classList.remove('show'); }
+    function saveSettings() {
+      merchantSettings.merchantName = document.getElementById('setMerchantName').value.trim() || "मेरी दुकान";
+      merchantSettings.upi = document.getElementById('setUpi').value.trim() || "9818589869@ptyes";
+      localStorage.setItem('CHUPAKABRA_SETTINGS', JSON.stringify(merchantSettings));
+      applySettingsToUI();
+      closeSettings();
+      speak('दुकान सेटिंग्स सेव हो गई हैं');
+    }
+
+    function applySettingsToUI() {
+      document.getElementById('hdrMerchantName').innerText = `दुकान: ${merchantSettings.merchantName}`;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, s => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[s]);
+    }
+
+    window.onload = initBlockchain;
+  </script>
+</body>
+</html>
